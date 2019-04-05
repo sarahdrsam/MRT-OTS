@@ -138,7 +138,7 @@ namespace Project2AP.Controllers
             }
 
         }
-        public ActionResult Index(string searchText = "", int page = 1)
+        public ActionResult Index(string searchText = "", int page = 1, string sortOrder = "")
         {
             if (Session["Roles"] == null)
             {
@@ -155,8 +155,20 @@ namespace Project2AP.Controllers
                 ViewBag.SearchText = searchText;
                 int recordsPerPage = 10;
 
-                var items = db.User.Where(x => x.Roles == "User");
-                var result = items.ToList().Where(x => x.Email.Contains(searchText)).ToPagedList(page, recordsPerPage);
+                var items = db.User.Where(x => x.Roles == "User").Where(x => x.Email.Contains(searchText)).ToList();
+                
+                switch (sortOrder) 
+                {
+                    case "Latest First":
+                    items = db.User.Where(x => x.Roles == "User").Where(x => x.Email.Contains(searchText)).OrderByDescending(x => x.UserId);
+                    break;
+                    
+                    case "Oldest First";
+                    items = db.User.Where(x => x.Roles == "User").Where(x => x.Email.Contains(searchText)).OrderBy(x => x.UserId);
+                    break;
+                }
+                
+                var result = items.ToList().ToPagedList(page, recordsPerPage);
 
                 if (!result.Any())
                 {
